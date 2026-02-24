@@ -1,0 +1,68 @@
+GET http://localhost:5201/intro
+
+###
+
+GET http://localhost:5201/intro/3
+
+###
+POST http://localhost:5201/intro 
+Content-Type: multipart/form-data
+
+{
+    "teamName": "İstanbul Başakşehir FK",
+    "yearEstablished": 1990,
+    "LogoURL": "/wwwroot/assets/teamlogo/basaksehir-logo.png",
+    "teamColor1" : "turuncu",
+    "teamColor2" : "lacivert"
+}
+
+###
+POST http://localhost:5201/intro 
+Content-Type: application/json
+
+{
+    "teamName": "Antalya spor",
+    "yearEstablished": 1967,
+    "LogoURL": "/assets/teamlogo/antalyaspor-logo.png"
+}
+
+###
+PUT http://localhost:5201/intro/4
+Content-Type: application/json
+
+{
+
+    "LogoURL": "/wwwroot/assets/teamlogo/genclerbirligispor-logo.png"
+}
+
+###
+DELETE http://localhost:5201/intro/1
+
+###
+POST http://localhost:5201/api/teams
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="teamName"
+
+Controller Test Team
+--boundary123
+Content-Disposition: form-data; name="yearEstablished"
+
+2000
+--boundary123
+Content-Disposition: form-data; name="teamColor1"
+
+pink
+--boundary123
+Content-Disposition: form-data; name="teamColor2"
+
+white
+--boundary123
+Content-Disposition: form-data; name="logo"; filename="test-img.jpeg"
+Content-Type: image/jpeg
+
+< ./test-assets/test-img.jpeg
+--boundary123--
+
+
