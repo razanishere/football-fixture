@@ -26,3 +26,9 @@ footballSys.frontend/dist/
 # =====================
 .DS_Store
 Thumbs.db
+
+### local notes
+report.txt
+footballSys.api/Controllers/notes.txt
+footballSys.api/Entities/notes
+footballSys.api/test-assets/
