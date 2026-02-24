@@ -31,3 +31,9 @@ export const createTeam = async (newTeam) => {
 
   return response.data;
 };
+
+//DELETE 
+export const deleteTeam = async (id) => {
+  await axios.delete(`${API_BASE_URL}/intro/${id}`);
+};
+
