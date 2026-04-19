@@ -16,6 +16,28 @@ Content-Type: multipart/form-data
     "teamColor2" : "lacivert"
 }
 
+### TEST 1 - Update team info only
+PUT http://localhost:5201/intro/21
+Content-Type: application/json
+
+{
+  "teamName": "PUT Test FC",
+  "yearEstablished": 1999,
+  "teamColor1": "Black",
+  "teamColor2": "White"
+}
+
+### TEST 2 - Update team logo
+POST http://localhost:5201/intro/1/logo
+Content-Type: multipart/form-data; boundary=LogoBoundary
+
+--LogoBoundary
+Content-Disposition: form-data; name="file"; filename="test.png"
+Content-Type: image/png
+
+< ./test.png
+--LogoBoundary--
+
 ###
 POST http://localhost:5201/intro 
 Content-Type: application/json
@@ -65,4 +87,41 @@ Content-Type: image/jpeg
 < ./test-assets/test-img.jpeg
 --boundary123--
 
+###
+
+PUT http://localhost:5201/api/teams/21
+Content-Type: multipart/form-data; boundary=Boundary123
+
+--Boundary123
+Content-Disposition: form-data; name="teamName"
+
+My Updated Team
+--Boundary123
+Content-Disposition: form-data; name="yearEstablished"
+
+2000
+--Boundary123
+Content-Disposition: form-data; name="teamColor1"
+
+red
+--Boundary123
+Content-Disposition: form-data; name="teamColor2"
+
+blue
+--Boundary123
+Content-Disposition: form-data; name="logo"; filename="test.png"
+Content-Type: image/png
+
+< ./test.png
+--Boundary123--
+
+###
+
+POST http://localhost:5201/api/fixtures/generate
+Content-Type: application/json
+
+[3, 4, 7]
+
+###
+POST http://localhost:5201/api/fixtures/test-play
 

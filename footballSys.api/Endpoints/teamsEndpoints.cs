@@ -4,6 +4,8 @@ using footballSys.api.Dtos;
 using footballSys.api.Entities;
 using footballSys.api.Mapping;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace footballSys.api.Endpoints;
 
@@ -11,7 +13,7 @@ public static class teamsEndpoints
 {
 
     const string GetIntroEndpointName = "GetIntro";
-    
+
     public static RouteGroupBuilder MapTeamsEndpoints(this WebApplication app)
     {
 
@@ -23,7 +25,7 @@ public static class teamsEndpoints
 
         // GET /intro
 
-        
+
         //* go to database, then Teams table, then Select a team and transfer it to a DTO (from databse to DTO)
         group.MapGet("/", async (teamsContext dbContext) =>
             await dbContext.Teams
@@ -60,7 +62,7 @@ public static class teamsEndpoints
                team.teamColor2
                );
 
-           
+
             return Results.CreatedAtRoute(
              GetIntroEndpointName,
              new { id = team.Id },
@@ -90,10 +92,11 @@ public static class teamsEndpoints
                 existingTeam.yearEstablished = updatedTeam.yearEstablished;
             }
 
-            if (!string.IsNullOrWhiteSpace(updatedTeam.LogoURL))
-            {
-                existingTeam.teamLogoPath = updatedTeam.LogoURL;
-            }
+            // if (!string.IsNullOrWhiteSpace(updatedTeam.LogoURL))
+            // {
+            //     existingTeam.teamLogoPath = updatedTeam.LogoURL;
+            // }
+            //! check this for deletion
 
             if (!string.IsNullOrWhiteSpace(updatedTeam.teamColor1))
             {
@@ -122,14 +125,84 @@ public static class teamsEndpoints
 
         group.MapDelete("/{id}", async (int id, teamsContext dbContext) =>
         {
-            
+
             await dbContext.Teams
                         .Where(team => team.Id == id)
                         .ExecuteDeleteAsync();
 
             return Results.NoContent();
         });
+
+
+    //    // UPDATE TEAM LOGO 
+    //    //! check this thing out
+    //     group.MapPost("/{id}/logo", async (
+    //     int id,
+    //     IFormFile file,
+    //     teamsContext dbContext
+    // ) => {
+    //     if (file == null || file.Length == 0)
+    //     {
+    //         return Results.BadRequest("No file uploaded.");
+    //     }
+
+    //     var team = await dbContext.Teams.FindAsync(id);
+    //     if (team is null)
+    //     {
+    //         return Results.NotFound();
+    //     }
+
+    //     // 1. Delete old logo if it exists
+    //     if (!string.IsNullOrWhiteSpace(team.teamLogoPath))
+    //     {
+    //         var oldFilePath = Path.Combine(
+    //             Directory.GetCurrentDirectory(),
+    //             "wwwroot",
+    //             team.teamLogoPath
+    //         );
+
+    //         if (File.Exists(oldFilePath))
+    //         {
+    //             File.Delete(oldFilePath);
+    //         }
+    //     }
+
+    //     // 2. Ensure upload folder exists
+    //     var uploadsFolder = Path.Combine(
+    //         Directory.GetCurrentDirectory(),
+    //         "wwwroot",
+    //         "uploads",
+    //         "teamLogos"
+    //     );
+
+    //     if (!Directory.Exists(uploadsFolder))
+    //     {
+    //         Directory.CreateDirectory(uploadsFolder);
+    //     }
+
+    //     // 3. Save new file
+    //     var extension = Path.GetExtension(file.FileName);
+    //     var fileName = $"{Guid.NewGuid()}{extension}";
+    //     var newFilePath = Path.Combine(uploadsFolder, fileName);
+
+    //     using (var stream = new FileStream(newFilePath, FileMode.Create))
+    //     {
+    //         await file.CopyToAsync(stream);
+    //     }
+
+    //     // 4. Update DB
+    //     team.teamLogoPath = $"uploads/teamLogos/{fileName}";
+
+    //     await dbContext.SaveChangesAsync();
+
+    //     return Results.NoContent();
+    //     });
+
+        
+
         return group;
 
     }
+
+
 }

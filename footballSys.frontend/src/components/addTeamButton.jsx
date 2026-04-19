@@ -1,33 +1,4 @@
-// import { useState } from "react";
-// import AddTeamForm from "../components/addTeamForm";
 
-// const AddTeamButton = () => {
-//   const [showForm, setShowForm] = useState(false);
-
-//   const handleClick = () => {
-//     setShowForm(true);
-//   };
-
-//   const handleClose = () => {
-//     setShowForm(false);
-//   };
-
-//   return (
-//     <div>
-//       <button onClick={handleClick}>
-//         Add Team
-//       </button>
-
-//       {showForm && (
-//         <AddTeamForm onClose={handleClose} />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default AddTeamButton;
-
-// //TODO: make the frotnend better then start the update button
 
 import { useState } from "react";
 import AddTeamForm from "./addTeamForm";

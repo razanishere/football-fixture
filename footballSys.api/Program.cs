@@ -1,6 +1,7 @@
 using footballSys.api.Data;
 using footballSys.api.Dtos;
 using footballSys.api.Endpoints;
+using footballSys.api.Services;
 using static footballSys.api.Dtos.createTeamDto;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,12 @@ var connString = builder.Configuration.GetConnectionString("FootballSys");
 
 
 builder.Services.AddSqlite<teamsContext>(connString);
-//builder.Services.AddScoped<teamsContext>()
+//builder.Services.AddScoped<teamsContext>() 
+// Add this line after builder.Services.AddSqlite<teamsContext>(connString);
+builder.Services.AddScoped<FixtureGenerator>();
+builder.Services.AddScoped<LeagueTableService>();
+builder.Services.AddScoped<GoalSystem>();
+builder.Services.AddScoped<ScoreGenerator>();
 
 
 builder.Services.AddCors(options =>
@@ -32,12 +38,14 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+
+
 app.UseStaticFiles();
 app.MapControllers();
 app.UseCors("ReactApp");
 app.MapTeamsEndpoints();
 
-await app.MigrateDbAsync();
+await app.MigrateDbAsync(); //  Data/DataExtentions.cs
 
 
 

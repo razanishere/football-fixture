@@ -24,20 +24,22 @@ public static class TeamMapping
     
    }
 
-   public static Teams ToEntity(this updateTeamDto team, int id)
+   public static Teams ToEntity(
+    this updateTeamDto team,
+    int id,
+    string existingLogoPath
+)
+{
+    return new Teams
     {
-        return new Teams
-        {
-            Id = id,
-            teamName = team.teamName,
-            yearEstablished = team.yearEstablished,
-            teamLogoPath = team.LogoURL,
-            teamColor1 = team.teamColor1,
-            teamColor2 = team.teamColor2
-        };
-       
-    }
-
+        Id = id,
+        teamName = team.teamName,
+        yearEstablished = team.yearEstablished,
+        teamLogoPath = existingLogoPath, // REQUIRED satisfied
+        teamColor1 = team.teamColor1,
+        teamColor2 = team.teamColor2
+    };
+}
     public static footballTeamIntro ToTeamDto(this Teams team)
     {
         return new(

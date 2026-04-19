@@ -9,7 +9,8 @@ namespace footballSys.api.Data;
 public static class DataExtensions
 {
 
-    //! understand: why use a task, why make it async ???
+    // this method does all the migrations when the app starts,
+    // If there are migrations that haven't been applied yet, apply them automatically.
     public static async Task MigrateDbAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();

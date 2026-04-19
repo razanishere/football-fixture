@@ -67,5 +67,56 @@ public class TeamsController : ControllerBase
     }
 
 
+    [HttpPut("{id}")]
+public async Task<IActionResult> UpdateTeam(
+    int id,
+    [FromForm] UpdateTeamFormDto updatedTeam,
+    [FromForm] IFormFile? logo 
+)
+{
+    var team = await _dbContext.Teams.FindAsync(id);
+    if (team is null)
+        return NotFound();
+
+    
+    if (!string.IsNullOrWhiteSpace(updatedTeam.teamName))
+        team.teamName = updatedTeam.teamName;
+
+    if (updatedTeam.yearEstablished != 0)
+        team.yearEstablished = updatedTeam.yearEstablished;
+
+    if (!string.IsNullOrWhiteSpace(updatedTeam.teamColor1))
+        team.teamColor1 = updatedTeam.teamColor1;
+
+    if (!string.IsNullOrWhiteSpace(updatedTeam.teamColor2))
+        team.teamColor2 = updatedTeam.teamColor2;
+
+    
+    if (logo != null && logo.Length > 0)
+    {
+        
+        if (!string.IsNullOrWhiteSpace(team.teamLogoPath))
+        {
+            var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", team.teamLogoPath);
+            if (System.IO.File.Exists(oldPath))
+                System.IO.File.Delete(oldPath);
+        }
+
+        
+        var ext = Path.GetExtension(logo.FileName);
+        var fileName = $"{Guid.NewGuid()}{ext}";
+        var savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "teamLogos", fileName);
+
+        using var stream = new FileStream(savePath, FileMode.Create);
+        await logo.CopyToAsync(stream);
+
+        team.teamLogoPath = $"uploads/teamLogos/{fileName}";
+    }
+
+    await _dbContext.SaveChangesAsync();
+
+    return NoContent();
+}
+
 }
 
