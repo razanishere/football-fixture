@@ -61,17 +61,27 @@ namespace footballSys.api.Controllers
 
             var matches = _context.Matches
             .Where(m => m.fixtureId == fixtureId)
+            .Select(m => new matchResultsDto
+            {
+                Id = m.Id,
+                HomeTeamId = m.HomeTeamId,
+                AwayTeamId = m.AwayTeamId,
+                HomeTeamName = _context.Teams.Where(t => t.Id == m.HomeTeamId).Select(t => t.teamName).FirstOrDefault(),
+                AwayTeamName = _context.Teams.Where(t => t.Id == m.AwayTeamId).Select(t => t.teamName).FirstOrDefault(),
+                HomeScore = m.homeScore,
+                AwayScore = m.awayScore,
+                Week = m.Week
+            })
             .ToList();
 
             var table = await _leagueTableService.CalculateTable(fixtureId);
 
-            var champion = table.FirstOrDefault(); //TODO: link to team name
+            
 
             return Ok(new
             {
                 Matches = matches,
                 Table = table,
-                Champion = champion
             });
 
         }

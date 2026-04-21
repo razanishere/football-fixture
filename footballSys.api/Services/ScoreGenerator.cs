@@ -16,24 +16,22 @@ public class ScoreGenerator
     //* Generate scores for ALL matches/rounds
     public void GenerateScore(int fixtureId)
     {
-
         var matches = _context.Matches
-        .Where(m => m.fixtureId == fixtureId)
-        .ToList();
-
+            .Where(m => m.fixtureId == fixtureId)
+            .ToList();
 
         Random rnd = new Random();
 
         foreach (var match in matches)
         {
-
-            if (match.homeScore != null || match.awayScore != null)
+            if (match.isPlayed == 1)
                 continue;
 
             _goalSystem.SimulateMatch(match, rnd);
+
+            match.isPlayed = 1; 
         }
 
-        Console.WriteLine($"Matches found: {matches.Count}");
         _context.SaveChanges();
     }
 

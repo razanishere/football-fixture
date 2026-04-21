@@ -8,10 +8,6 @@ const PlayPage = () => {
   const [currentWeek, setCurrentWeek] = useState(0);
   const [resultsByWeek, setResultsByWeek] = useState({});
 
-  const goToMainMenu = () => {
-    navigate("/"); // adjust this if your main menu route is different
-  };
-
   // this is where fixtures will come from
   const data = location.state?.fixtures;
   const fixtures = data?.fixtures;
@@ -26,6 +22,10 @@ const PlayPage = () => {
   if (!fixtures) {
     return <div>No fixtures found</div>;
   }
+
+  const goToMainMenu = () => {
+    navigate("/");
+  };
 
   const fetchWeek = async (weekNumber) => {
     try {
@@ -68,6 +68,29 @@ const PlayPage = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const playAllFixture = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5201/api/simulation/play-all/${fixtureId}`,
+        {
+          method: "POST",
+        },
+      );
+
+      const data = await response.json();
+
+      console.log("PLAY ALL RESULT:", data);
+
+      await fetchWeek(currentWeek + 1);
+    } catch (err) {
+      console.error(err);
+    }
+
+    setCurrentWeek(0);
+    setResultsByWeek({});
+    await fetchWeek(1);
   };
 
   const handlePlayWeek = async () => {
@@ -121,6 +144,8 @@ const PlayPage = () => {
           ))}
         </div>
       )}
+
+      <button onClick={playAllFixture}>Play All Fixture</button>
     </div>
   );
 };
