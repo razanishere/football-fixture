@@ -26,7 +26,7 @@ public class ScoreGenerator
 
         foreach (var match in matches)
         {
-            
+
             if (match.homeScore != null || match.awayScore != null)
                 continue;
 
@@ -39,7 +39,7 @@ public class ScoreGenerator
 
 
     //* this is only for one week
-    public void GenerateScoreForWeek( int fixtureId, int week)
+    public void GenerateScoreForWeek(int fixtureId, int week)
     {
         var matches = _context.Matches
         .Where(m => m.fixtureId == fixtureId && m.Week == week)
@@ -48,17 +48,18 @@ public class ScoreGenerator
 
         Random rnd = new Random();
 
-        foreach(var match in matches)
+        foreach (var match in matches)
         {
-            if(match.homeScore != null || match.awayScore != null)
-            continue;
+            if (match.isPlayed == 1)
+                continue;
 
             _goalSystem.SimulateMatch(match, rnd);
+            match.isPlayed = 1;
 
         }
 
         _context.SaveChanges();
-        
+
     }
 
 

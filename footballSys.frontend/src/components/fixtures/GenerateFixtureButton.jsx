@@ -23,7 +23,6 @@ const GenerateFixtureButton = () => {
           onGenerate={(data) => {
             setFixtures(data);
             setIsSelectionOn(false);
-            ////setShowModal(true);
 
             navigate("/play", { state: { fixtures: data } });
           }}
