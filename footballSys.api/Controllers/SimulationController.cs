@@ -57,6 +57,27 @@ namespace footballSys.api.Controllers
                 return NotFound("NOT FOUND!");
             }
 
+            // show teams score
+            var teamIdsInFixture = _context.Matches
+                .Where(m => m.fixtureId == fixtureId)
+                .Select(m => m.HomeTeamId)
+                .Union(
+                    _context.Matches
+                        .Where(m => m.fixtureId == fixtureId)
+                        .Select(m => m.AwayTeamId)
+                )
+                .Distinct();
+                
+            var teamLevels = _context.Teams
+                .Where(t => teamIdsInFixture.Contains(t.Id))
+                .Select(t => new
+                {
+                    t.Id,
+                    t.teamName,
+                    t.level
+                })
+                .ToList();
+
             _scoreGenerator.GenerateScore(fixtureId);
 
             var matches = _context.Matches
@@ -76,12 +97,13 @@ namespace footballSys.api.Controllers
 
             var table = await _leagueTableService.CalculateTable(fixtureId);
 
-            
+
 
             return Ok(new
             {
                 Matches = matches,
                 Table = table,
+                TeamLevels = teamLevels
             });
 
         }
@@ -105,6 +127,28 @@ namespace footballSys.api.Controllers
                 return NotFound("Week not found!");
             }
 
+            //show team scores
+
+            var teamIdsInFixture = _context.Matches
+                .Where(m => m.fixtureId == fixtureId)
+                .Select(m => m.HomeTeamId)
+                .Union(
+                    _context.Matches
+                        .Where(m => m.fixtureId == fixtureId)
+                        .Select(m => m.AwayTeamId)
+                )
+                .Distinct();
+
+            var teamLevels = _context.Teams
+                .Where(t => teamIdsInFixture.Contains(t.Id))
+                .Select(t => new
+                {
+                    t.Id,
+                    t.teamName,
+                    t.level
+                })
+                .ToList();
+
             _scoreGenerator.GenerateScoreForWeek(fixtureId, week);
 
             var matches = _context.Matches
@@ -127,7 +171,8 @@ namespace footballSys.api.Controllers
             return Ok(new
             {
                 Matches = matches,
-                Table = table
+                Table = table,
+                TeamLevels = teamLevels
             });
         }
 

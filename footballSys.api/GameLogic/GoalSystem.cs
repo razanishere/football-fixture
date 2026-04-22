@@ -58,7 +58,7 @@ Strength	Attempt Range
 *after each match, the score in total gets calculated. the winner team +1 level, loser -1 level and draw dosent chamge levels.
 
 so the flow will be like this:
-*Strength → Attempts → Goals → Match Result → Points → Strength Update
+*Strength > Attempts > Goals > Match Result > Points > Strength Update
 
 */
 
@@ -108,6 +108,29 @@ public class GoalSystem
         return goals;
 
     }
+
+    private void UpdateLevel(int homeGoals, int awayGoals, Teams home, Teams away)
+{
+    int diff = Math.Abs(homeGoals - awayGoals);
+
+    
+    if (diff > 1)
+    {
+        if (homeGoals > awayGoals)
+        {
+            home.level++;
+            away.level--;
+        }
+        else
+        {
+            away.level++;
+            home.level--;
+        }
+    }
+
+    home.level = Math.Clamp(home.level, 1, 9);
+    away.level = Math.Clamp(away.level, 1, 9);
+}
 
     /*
     //! CURRENTLY THIS IS WRONG LOGIC, it changes the levels based on GOAL NUMBER
@@ -221,8 +244,8 @@ public class GoalSystem
         
        //// UpdateLeagueTable(match, homeGoals, awayGoals, homeTeam, awayTeam);
 
+       UpdateLevel(homeGoals, awayGoals, homeTeam, awayTeam);
         
-       //// UpdateLevel(homeGoals, awayGoals, homeTeam, awayTeam);
 
 
     }

@@ -7,6 +7,7 @@ const PlayPage = () => {
 
   const [currentWeek, setCurrentWeek] = useState(0);
   const [resultsByWeek, setResultsByWeek] = useState({});
+  const [teamLevels, setTeamLevels] = useState([]);
 
   // this is where fixtures will come from
   const data = location.state?.fixtures;
@@ -65,6 +66,8 @@ const PlayPage = () => {
         ...prev,
         [currentWeek]: data.matches,
       }));
+
+      setTeamLevels(data.teamLevels);
     } catch (error) {
       console.error(error);
     }
@@ -84,6 +87,7 @@ const PlayPage = () => {
       console.log("PLAY ALL RESULT:", data);
 
       await fetchWeek(currentWeek + 1);
+      setTeamLevels(data.teamLevels);
     } catch (err) {
       console.error(err);
     }
@@ -146,6 +150,15 @@ const PlayPage = () => {
       )}
 
       <button onClick={playAllFixture}>Play All Fixture</button>
+
+      <div style={{ marginTop: "20px" }}>
+        <h3>Team Levels</h3>
+        {teamLevels.map((team) => (
+          <div key={team.id}>
+            {team.teamName} Level: {team.level}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

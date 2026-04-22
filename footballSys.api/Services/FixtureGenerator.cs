@@ -131,6 +131,20 @@ public class FixtureGenerator
     }
 
 
+    //* resets ALL teams to 5
+    //? do i reset only the teams used 
+    private void ResetAllTeamLevels()
+    {
+        var teams = _context.Teams.ToList();
+
+        foreach (var team in teams)
+        {
+            team.level = 5;
+        }
+
+        _context.SaveChanges();
+    }
+
     //method to save fixture result to the database
     private int SaveFixtureToDB(List<List<MatchDTO>> fixtures)
     {
@@ -177,6 +191,8 @@ public class FixtureGenerator
     {
 
         var fixtures = new List<List<MatchDTO>>();
+
+        ResetAllTeamLevels();
 
         // loop through each round
         for (int i = 1; i <= _roundCount; i++)
