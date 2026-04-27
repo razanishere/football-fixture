@@ -15,12 +15,15 @@ namespace footballSys.api.Controllers
     {
         private readonly teamsContext _context;
         private readonly FixtureGenerator _fixtureGenerator;
+        
 
 
         public FixturesController(teamsContext context, FixtureGenerator fixtureGenerator)
         {
             _context = context;
             _fixtureGenerator = fixtureGenerator;
+           
+
         }
 
         [HttpPost("generate")]
@@ -78,7 +81,7 @@ namespace footballSys.api.Controllers
         }
 
 
-        //! BELOW: MATCH RESULTS ENDPOINTS
+        // BELOW: MATCH RESULTS ENDPOINTS
 
         //* show all matches with results
         [HttpGet("{fixtureId}/matches")]
@@ -129,36 +132,13 @@ namespace footballSys.api.Controllers
 
         }
 
-        /*
-                //* method to show only ONE matches results 
-                [HttpGet("{matchId}/match-results")]
-                public IActionResult GetSingleMatchResults(int matchId)
-                {
-                    var match = _context.Matches
-                    .Where(m => m.Id == matchId)
-                    .Select(x => new
-                    {
-                        x.Id,
-                        x.Week,
-                        x.HomeTeamId, //TODO: LINK TO TEAMS AND VIEW NAMES
-                        x.AwayTeamId, //TODO: LINK TO TEAMS AND VIEW NAMES
-                        x.homeScore,
-                        x.awayScore
-                    })
-                    .ToList();
 
-                    return Ok(match);
-                }
-
-                */
-
-
-
-
-
-
+      
 
     }
+
+
+
 
 
 }

@@ -1,6 +1,10 @@
 using System.Threading.Tasks;
 using footballSys.api.Data;
 using footballSys.api.Entities;
+using Microsoft.EntityFrameworkCore;
+
+//* the league table gets calculated based on played matches.
+//* when viewed on week 3 out of 6, it will show the results up to week 3.
 
 public class LeagueTableService
 {
@@ -13,7 +17,7 @@ public class LeagueTableService
 
     //! understand this code
     //* method to calculate league table dynamically on ASKED WEEK 
-    public async Task<List<LeagueTable>> CalculateTable(int fixtureId, int? upToWeek = null)
+    public async Task<List<leagueTableDTO>> CalculateTable(int fixtureId, int? upToWeek = null)
     {
         var matchesList = _context.Matches
         .Where(m => m.fixtureId == fixtureId &&
@@ -27,9 +31,15 @@ public class LeagueTableService
             matchesList = matchesList.Where(m => m.Week <= upToWeek.Value);
         }
 
-        var matches = matchesList.ToList();
+        var matches = await matchesList.ToListAsync();
 
-        var table = new Dictionary<int, LeagueTable>();
+        var teams = await _context.Teams
+    .Where(t => matches.Select(m => m.HomeTeamId)
+        .Union(matches.Select(m => m.AwayTeamId))
+        .Contains(t.Id))
+    .ToDictionaryAsync(t => t.Id, t => t.teamName);
+
+        var table = new Dictionary<int, leagueTableDTO>();
 
         foreach (var match in matches)
         {
@@ -38,30 +48,32 @@ public class LeagueTableService
 
             if (!table.ContainsKey(homeId))
             {
-                table[homeId] = new LeagueTable
+                table[homeId] = new leagueTableDTO
                 {
                     TeamId = homeId,
-                    FixtureId = fixtureId,
-                    GoalsScored = 0,
-                    GoalsConceded = 0,
+                    TeamName = teams[homeId],
+                    Played = 0,
                     Wins = 0,
                     Draws = 0,
                     Losses = 0,
+                    GoalsScored = 0,
+                    GoalsConceded = 0,
                     Points = 0
                 };
             }
 
             if (!table.ContainsKey(awayId))
             {
-                table[awayId] = new LeagueTable
+                table[awayId] = new leagueTableDTO
                 {
                     TeamId = awayId,
-                    FixtureId = fixtureId,
-                    GoalsScored = 0,
-                    GoalsConceded = 0,
+                    TeamName = teams[awayId],
+                    Played = 0,
                     Wins = 0,
                     Draws = 0,
                     Losses = 0,
+                    GoalsScored = 0,
+                    GoalsConceded = 0,
                     Points = 0
                 };
             }
@@ -72,6 +84,8 @@ public class LeagueTableService
             int homeGoals = match.homeScore.Value;
             int awayGoals = match.awayScore.Value;
 
+            home.Played++;
+            away.Played++;
 
             home.GoalsScored += homeGoals;
             home.GoalsConceded += awayGoals;
@@ -103,7 +117,7 @@ public class LeagueTableService
 
         return table.Values
         .OrderByDescending(t => t.Points)
-        .ThenByDescending(t => t.GoalsScored - t.GoalsConceded)
+        .ThenByDescending(t => t.GoalDifference)
         .ToList();
     }
 

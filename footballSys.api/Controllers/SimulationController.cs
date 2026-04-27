@@ -29,22 +29,6 @@ namespace footballSys.api.Controllers
             _leagueTableService = leagueTableService;
         }
 
-        /* Simulate matches method here
-                private void SimulateMatches(List<Match> matches)
-                {
-                    Random rnd = new Random();
-
-                    foreach (var match in matches)
-                    {
-                        if (match.homeScore != null)
-                            continue;
-
-                        _goalSystem.SimulateMatch(match, rnd);
-                    }
-
-                    _context.SaveChanges();
-                }
-        */
 
         //* controller to play all fixture
         [HttpPost("play-all/{fixtureId}")]
@@ -67,7 +51,7 @@ namespace footballSys.api.Controllers
                         .Select(m => m.AwayTeamId)
                 )
                 .Distinct();
-                
+
             var teamLevels = _context.Teams
                 .Where(t => teamIdsInFixture.Contains(t.Id))
                 .Select(t => new
@@ -110,7 +94,7 @@ namespace footballSys.api.Controllers
 
         //* endpoint to make scores only for one week 
         [HttpPost("play-week/{fixtureId}/{week}")]
-        public IActionResult PlayOneWeek(int fixtureId, int week)
+        public async Task<IActionResult> PlayOneWeekAsync(int fixtureId, int week)
         {
 
             var fixtureExists = _context.Matches.Any(m => m.fixtureId == fixtureId);
@@ -166,7 +150,7 @@ namespace footballSys.api.Controllers
             })
             .ToList();
 
-            var table = _leagueTableService.CalculateTable(fixtureId, week);
+            var table = await _leagueTableService.CalculateTable(fixtureId, week);
 
             return Ok(new
             {
@@ -178,88 +162,15 @@ namespace footballSys.api.Controllers
 
 
 
+        //* show and calculate league table
+        [HttpGet("{fixtureId}/table")]
+        public async Task<IActionResult> GetLeagueTable(int fixtureId, int? week = null)
+        {
+            var table = await _leagueTableService.CalculateTable(fixtureId, week);
+            return Ok(table);
+        }
 
 
-
-        // BELOW: LEAGUE SCORE TABLE ENDPOINT 3 STATES MATCH, WEEK AND FIXTURE
-        /*
-                //* play one match and return updated league table
-                //! LeagueOneMatch will NOT be used in the frontend. comment after finishing the project.
-                [HttpPost("league-table/test/{matchId}")]
-                public IActionResult LeagueOneMatch(int matchId)
-                {
-                    var match = _context.Matches.FirstOrDefault(m => m.Id == matchId);
-
-                    if (match == null)
-                    {
-                        return NotFound("match not found");
-                    }
-
-                    if (match.homeScore != null)
-                        return BadRequest("match already playd");
-
-                    Random rnd = new Random();
-                    _goalSystem.SimulateMatch(match, rnd);
-                    _context.SaveChanges();
-
-                    var table = _leagueTableService.CalculateTable(match.fixtureId);
-
-                    return Ok(table);
-                }
-        */
-
-        /*
-                //*play one week (all matches in a week) and return league table
-
-                [HttpPost("league-table/{fixtureId}/{week}")]
-                public IActionResult LeagueOneWeek(int fixtureId, int week)
-                {
-                    var matches = _context.Matches
-                        .Where(m => m.fixtureId == fixtureId && m.Week == week)
-                        .ToList();
-
-                    if (!matches.Any())
-                        return NotFound();
-
-                    SimulateMatches(matches);
-
-                    var table = _leagueTableService.CalculateTable(fixtureId, week);
-
-                    return Ok(new
-                    {
-                        Matches = matches,
-                        Table = table
-                    });
-                }
-
-        */
-
-        /*
-                //* return league table for all fixture AND CHAMPION of the fixture
-
-
-                public IActionResult LeagueFixture(int fixtureId)
-                {
-                    var matches = _context.Matches
-                        .Where(m => m.fixtureId == fixtureId)
-                        .ToList();
-
-                    if (!matches.Any())
-                        return NotFound();
-
-                    SimulateMatches(matches);
-
-                    var table = _leagueTableService.CalculateTable(fixtureId);
-
-                    return Ok(new
-                    {
-                        Matches = matches,
-                        Table = table
-                    });
-                }
-
-
-        */
 
 
 

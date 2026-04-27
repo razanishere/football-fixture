@@ -9,13 +9,17 @@ const PlayPage = () => {
   const [resultsByWeek, setResultsByWeek] = useState({});
   const [teamLevels, setTeamLevels] = useState([]);
 
-  // this is where fixtures will come from
-  const data = location.state?.fixtures;
-  const fixtures = data?.fixtures;
-  console.log("PlayPage data:", fixtures);
-  const fixtureId = data?.fixtureId;
+  //for league table
+  const [showTableModal, setShowTableModal] = useState(false);
+  const [leagueTable, setLeagueTable] = useState([]);
+  const [tableUnlocked, setTableUnlocked] = useState(false);
 
-  //next previous button boundries
+  // this is where fixtures will come from
+  const fixtureData = location.state?.fixtures;
+  const fixtures = fixtureData?.fixtures;
+  const fixtureId = fixtureData?.fixtureId;
+
+  // next previous button boundries
   const isFirstWeek = currentWeek === 0;
   const isLastWeek = currentWeek === fixtures.length - 1;
 
@@ -51,6 +55,10 @@ const PlayPage = () => {
 
   const playWeek = async () => {
     try {
+      console.group("PLAY WEEK");
+      console.log("Week:", currentWeek + 1);
+      console.log("Fixtures:", fixtures);
+
       const response = await fetch(
         `http://localhost:5201/api/simulation/play-week/${fixtureId}/${currentWeek + 1}`,
         {
@@ -60,7 +68,8 @@ const PlayPage = () => {
 
       const data = await response.json();
 
-      console.log("PLAY RESULT:", data);
+      console.log("Response:", data);
+      console.groupEnd();
 
       setResultsByWeek((prev) => ({
         ...prev,
@@ -75,6 +84,9 @@ const PlayPage = () => {
 
   const playAllFixture = async () => {
     try {
+      console.log("=== PLAY ALL CLICKED ===");
+      console.log("Fixtures:", fixtures);
+
       const response = await fetch(
         `http://localhost:5201/api/simulation/play-all/${fixtureId}`,
         {
@@ -84,22 +96,49 @@ const PlayPage = () => {
 
       const data = await response.json();
 
-      console.log("PLAY ALL RESULT:", data);
-
-      await fetchWeek(currentWeek + 1);
       setTeamLevels(data.teamLevels);
+
+      
+      setCurrentWeek(0);
+      setResultsByWeek({});
+      await fetchWeek(1);
+
+      
+      await fetchLeagueTable();
+      setShowTableModal(true);
+      setTableUnlocked(true);
     } catch (err) {
       console.error(err);
     }
+  };
+  const fetchLeagueTable = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5201/api/simulation/${fixtureId}/table?week=${currentWeek + 1}`,
+      );
 
-    setCurrentWeek(0);
-    setResultsByWeek({});
-    await fetchWeek(1);
+      const data = await res.json();
+
+      console.group("LEAGUE TABLE");
+      console.table(data);
+      console.groupEnd();
+
+      setLeagueTable(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handlePlayWeek = async () => {
     await playWeek();
     await fetchWeek(currentWeek + 1);
+
+    // for leagyue table
+    if (currentWeek === fixtures.length - 1) {
+      await fetchLeagueTable();
+      setShowTableModal(true);
+      setTableUnlocked(true);
+    }
   };
 
   const handleNext = () => {
@@ -159,6 +198,114 @@ const PlayPage = () => {
           </div>
         ))}
       </div>
+
+      {/*league table section*/}
+      {tableUnlocked && !showTableModal && (
+        <button
+          onClick={async () => {
+            await fetchLeagueTable();
+            setShowTableModal(true);
+          }}
+        >
+          Show League Table
+        </button>
+      )}
+
+      {showTableModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.7)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              padding: "20px",
+              borderRadius: "10px",
+              width: "500px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <h2>League Table</h2>
+
+              <button
+                onClick={() => setShowTableModal(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  fontSize: "20px",
+                  cursor: "pointer",
+                }}
+              >
+                ✖
+              </button>
+            </div>
+
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ borderBottom: "2px solid black" }}>
+                  <th>#</th>
+                  <th>Team</th>
+                  <th>P</th>
+                  <th>W</th>
+                  <th>D</th>
+                  <th>L</th>
+                  <th>GS</th>
+                  <th>GC</th>
+                  <th>Pts</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {[...leagueTable]
+                  .sort((a, b) => {
+                    if (b.points !== a.points) return b.points - a.points;
+                    if (b.goalDifference !== a.goalDifference)
+                      return b.goalDifference - a.goalDifference;
+                    return b.goalsScored - a.goalsScored;
+                  })
+                  .map((team, index) => (
+                    <tr
+                      key={team.teamId}
+                      style={{
+                        textAlign: "center",
+                        backgroundColor:
+                          index === 0 ? "#ffec3d" : "transparent",
+                        fontWeight: index === 0 ? "bold" : "normal",
+                      }}
+                    >
+                      <td>{index + 1}</td>
+                      <td style={{ textAlign: "left" }}>{team.teamName}</td>
+                      <td>{team.played}</td>
+                      <td>{team.wins}</td>
+                      <td>{team.draws}</td>
+                      <td>{team.losses}</td>
+                      <td>{team.goalsScored}</td>
+                      <td>{team.goalsConceded}</td>
+                      <td>
+                        <strong>{team.points}</strong>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

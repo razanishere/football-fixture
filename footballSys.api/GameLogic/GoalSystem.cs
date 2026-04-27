@@ -132,95 +132,7 @@ public class GoalSystem
     away.level = Math.Clamp(away.level, 1, 9);
 }
 
-    /*
-    //! CURRENTLY THIS IS WRONG LOGIC, it changes the levels based on GOAL NUMBER
-    //TODO: change the logic to change level through HIGHER SCORE (puan) NOT HIGHER GOALS
-    private void UpdateLevel(int homeGoals, int awayGoals, Teams home, Teams away)
-    {
-        if (homeGoals < awayGoals)
-        {
-            home.level--;
-            away.level++;
-        }
-        else if (awayGoals < homeGoals)
-        {
-            home.level++;
-            away.level--;
-        }
-
-        home.level = Math.Clamp(home.level, 1, 9);
-        away.level = Math.Clamp(away.level, 1, 9);
-    }
-
-    //* method to update the data in the league table
-    //! maybe we can remove this?
-    private async Task UpdateLeagueTable(Match match, int homeGoals, int awayGoals, Teams homeTeam, Teams awayTeam)
-    {
-        int fixtureId = match.fixtureId;
-
-        var homeRow = _context.LeagueTable
-        .FirstOrDefault(x => x.TeamId == match.HomeTeamId && x.FixtureId == match.fixtureId);
-
-        var awayRow = _context.LeagueTable
-        .FirstOrDefault(x => x.TeamId == match.AwayTeamId && x.FixtureId == match.fixtureId);
-
-        // if row dosent exist, create one
-        if (homeRow == null)
-        {
-            homeRow = new LeagueTable
-            {
-                TeamId = homeTeam.Id,
-                FixtureId = fixtureId
-
-            };
-            _context.LeagueTable.Add(homeRow);
-        }
-
-        if (awayRow == null)
-        {
-            awayRow = new LeagueTable
-            {
-                TeamId = awayTeam.Id,
-                FixtureId = fixtureId
-            };
-            _context.LeagueTable.Add(awayRow);
-        }
-
-        //birikimli skorlar 
-        homeRow.GoalsScored += homeGoals;
-        homeRow.GoalsConceded += awayGoals;
-
-        awayRow.GoalsScored += awayGoals;
-        awayRow.GoalsConceded += homeGoals;
-
-        //Results P = A * 3 + B * 1
-
-        if (homeGoals > awayGoals)
-        {
-            homeRow.Wins += 1;
-            homeRow.Points += 3;
-
-            awayRow.Losses += 1;
-        }
-        else if (homeGoals < awayGoals)
-        {
-            awayRow.Wins += 1;
-            awayRow.Points += 3;
-
-            homeRow.Losses += 1;
-
-        }
-        else
-        {
-            homeRow.Draws += 1;
-            homeRow.Points += 1;
-
-            awayRow.Draws += 1;
-            awayRow.Points += 1;
-        }
-    }
-
-    */
+    
 
     // we dont save to database here because this method gets used continuesly and the data keeps getting updated
     // we save the scores to the database in the ScoreGenerator method
@@ -241,8 +153,6 @@ public class GoalSystem
         match.homeScore = homeGoals;
         match.awayScore = awayGoals;
 
-        
-       //// UpdateLeagueTable(match, homeGoals, awayGoals, homeTeam, awayTeam);
 
        UpdateLevel(homeGoals, awayGoals, homeTeam, awayTeam);
         
