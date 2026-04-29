@@ -27,4 +27,6 @@ public class Match
     public int isPlayed {get; set;}
 
     public int fixtureId {get; set;}
+
+    public Fixture Fixture { get; set; }
 }

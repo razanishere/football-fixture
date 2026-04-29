@@ -210,9 +210,6 @@ public class FixtureGenerator
         var reverseFixtures = GenerateReverseFixtures(fixtures);
         fixtures.AddRange(reverseFixtures);
 
-        //call saving to database method
-        //SaveFixtureToDB(fixtures);
-
         int fixtureId = SaveFixtureToDB(fixtures);
 
         return (fixtureId, fixtures);

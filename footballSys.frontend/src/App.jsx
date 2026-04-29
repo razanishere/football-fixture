@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import MainMenu from "./components/mainMenu";
 import PlayPage from "./components/playScreen/PlayPage";
+import ContinueGamePage from "./components/continue/ContinueGamePage";
 
 //* we do the routing here
 
@@ -9,6 +10,7 @@ function App() {
     <Routes>
       <Route path="/" element={<MainMenu />} />
       <Route path="/play" element={<PlayPage />} />
+      <Route path="/continue-game" element={<ContinueGamePage />} />
     </Routes>
   );
 }
