@@ -30,11 +30,9 @@ const PlayPage = () => {
 
   const [fixtures, setFixtures] = useState([]);
 
-
   // next previous button boundries
   const isFirstWeek = currentWeek === 0;
   const isLastWeek = currentWeek === fixtures.length - 1;
-
 
   const goToMainMenu = () => {
     navigate("/");
@@ -69,7 +67,19 @@ const PlayPage = () => {
     const loadFixture = async () => {
       try {
         const data = await fetchFixtureByIdApi(fixtureId);
+
         setFixtures(data.fixtures);
+
+        const playedWeeks = data.playedWeeks;
+
+        const loadedResults = {};
+
+        for (const week of playedWeeks) {
+          const weekData = await fetchWeekApi(fixtureId, week);
+          loadedResults[week - 1] = weekData;
+        }
+
+        setResultsByWeek(loadedResults);
       } catch (err) {
         console.error(err);
       }
@@ -79,7 +89,6 @@ const PlayPage = () => {
       loadFixture();
     }
   }, [fixtureId]);
-
 
   const playWeek = async () => {
     try {

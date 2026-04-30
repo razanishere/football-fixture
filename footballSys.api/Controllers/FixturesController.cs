@@ -130,11 +130,19 @@ namespace footballSys.api.Controllers
                 }).ToList())
                 .ToList();
 
+            var playedWeeks = matches
+                .Where(m => m.isPlayed == 1)
+                .Select(m => m.Week)
+                .Distinct()
+                .OrderBy(w => w)
+                .ToList();
+
             return Ok(new
             {
                 FixtureId = fixtureId,
                 Fixtures = fixtures,
-                Teams = teams
+                Teams = teams,
+                PlayedWeeks = playedWeeks
             });
         }
 
