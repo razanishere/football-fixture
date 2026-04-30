@@ -15,22 +15,22 @@ namespace footballSys.api.Controllers
     {
         private readonly teamsContext _context;
         private readonly FixtureGenerator _fixtureGenerator;
-        
+
 
 
         public FixturesController(teamsContext context, FixtureGenerator fixtureGenerator)
         {
             _context = context;
             _fixtureGenerator = fixtureGenerator;
-           
+
 
         }
 
         [HttpPost("generate")]
-        public IActionResult GenerateFixtures([FromBody] List<int> teamIds)
+        public IActionResult GenerateFixtures([FromBody] GenerateFixtureRequest request)
         {
             var selectedTeams = _context.Teams
-                .Where(t => teamIds.Contains(t.Id))
+                .Where(t => request.TeamIds.Contains(t.Id))
                 .ToList();
 
             var teamIdList = selectedTeams
@@ -41,7 +41,7 @@ namespace footballSys.api.Controllers
             _fixtureGenerator.InitializeFixtureSettings(teamIdList);
 
 
-            var result = _fixtureGenerator.CreateFixtures();
+            var result = _fixtureGenerator.CreateFixtures(request.FixtureName);
             var fixtures = result.fixtures;
             var fixtureId = result.fixtureId;
 
@@ -133,7 +133,7 @@ namespace footballSys.api.Controllers
         }
 
 
-      
+
 
     }
 

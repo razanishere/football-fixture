@@ -173,9 +173,40 @@ namespace footballSys.api.Controllers
 
 
 
+        //* mark fixture as finished
+        [HttpPut("{fixtureId}/finish")]
+        public IActionResult FinishFixture(int fixtureId)
+        {
+            var fixture = _context.Fixtures.FirstOrDefault(f => f.Id == fixtureId);
 
+            if (fixture == null)
+            {
+                return NotFound("Fixture not found!");
+            }
 
+            // optional safety: check all matches played
+            var allPlayed = _context.Matches
+                .Where(m => m.fixtureId == fixtureId)
+                .All(m => m.homeScore != null && m.awayScore != null);
 
+            if (!allPlayed)
+            {
+                return BadRequest("Not all matches are played yet!");
+            }
+
+            fixture.IsFinished = true;
+            _context.SaveChanges();
+
+            return Ok("Fixture marked as finished.");
+        }
+
+         //* to fetch fixture infos from Fixture table
+        [HttpGet("get-fixtures")]
+        public async Task<ActionResult<IEnumerable<Fixture>>> GetFixtures()
+        {
+            var fixtures = await _context.Fixtures.ToListAsync();
+            return Ok(fixtures);
+        }
 
 
 

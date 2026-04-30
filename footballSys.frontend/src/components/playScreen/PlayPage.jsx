@@ -10,6 +10,7 @@ import {
   playWeekApi,
   playAllApi,
   fetchLeagueTableApi,
+  finishFixtureApi
 } from "./services/playApi";
 
 const PlayPage = () => {
@@ -38,6 +39,9 @@ const PlayPage = () => {
     return <div>No fixtures found</div>;
   }
 
+ 
+
+
   const goToMainMenu = () => {
     navigate("/");
   };
@@ -58,6 +62,16 @@ const PlayPage = () => {
   useEffect(() => {
     fetchWeek(currentWeek + 1);
   }, [currentWeek]);
+
+  const finishFixture = async () => {
+    try {
+      await finishFixtureApi(fixtureId);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  
 
   const playWeek = async () => {
     try {
@@ -91,6 +105,7 @@ const PlayPage = () => {
       await fetchWeek(1);
 
       await fetchLeagueTable();
+      await finishFixture();
       setShowTableModal(true);
       setTableUnlocked(true);
     } catch (err) {
@@ -119,6 +134,7 @@ const PlayPage = () => {
     // for leagyue table
     if (currentWeek === fixtures.length - 1) {
       await fetchLeagueTable();
+      await finishFixture();
       setShowTableModal(true);
       setTableUnlocked(true);
     }
@@ -165,6 +181,7 @@ const PlayPage = () => {
         <button
           onClick={async () => {
             await fetchLeagueTable();
+            
             setShowTableModal(true);
           }}
         >

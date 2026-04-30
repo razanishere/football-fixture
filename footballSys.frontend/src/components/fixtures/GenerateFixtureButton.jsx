@@ -12,10 +12,14 @@ const GenerateFixtureButton = () => {
   //* is the selection menu open?
   const [isSelectionOn, setIsSelectionOn] = useState(false);
 
+  
+
   const navigate = useNavigate();
 
   return (
     <>
+      
+
       <button onClick={() => setIsSelectionOn(true)}>New Game</button>
       {isSelectionOn && (
         <FixtureTeamSelectionModal
@@ -24,7 +28,11 @@ const GenerateFixtureButton = () => {
             setFixtures(data);
             setIsSelectionOn(false);
 
-            navigate("/play", { state: { fixtures: data } });
+            navigate("/play", {
+              state: {
+                fixtures: data,
+              },
+            });
           }}
         />
       )}

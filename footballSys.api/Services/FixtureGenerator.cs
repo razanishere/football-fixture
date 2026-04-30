@@ -146,71 +146,65 @@ public class FixtureGenerator
     }
 
     //method to save fixture result to the database
-    private int SaveFixtureToDB(List<List<MatchDTO>> fixtures)
+    private int SaveFixtureToDB(List<List<MatchDTO>> fixtures, int fixtureId)
     {
-
-        //find the max value in the fixtureId column
-        int maxfixtureId = _context.Matches.Any() // is there any records ?
-        ? _context.Matches.Max(m => m.fixtureId)
-        : 0;
-
-        // assign new fixtureId
-        int newFixtureId = maxfixtureId + 1;
-
-        //loop through the matches
         foreach (var week in fixtures)
         {
-
-
             foreach (var matchDTO in week)
             {
-                //matching to the entity
                 var matchEntity = new Match
                 {
                     HomeTeamId = matchDTO.HomeTeamId,
                     AwayTeamId = matchDTO.AwayTeamId,
                     Week = matchDTO.Week,
-                    fixtureId = newFixtureId,
+                    fixtureId = fixtureId,
                     homeScore = null,
                     awayScore = null,
                     isPlayed = 0
                 };
 
-                _context.Matches.AddRange(matchEntity);
-
+                _context.Matches.Add(matchEntity);
             }
         }
 
         _context.SaveChanges();
 
-        return newFixtureId;
+        return fixtureId;
     }
 
 
-    public (int fixtureId, List<List<MatchDTO>> fixtures) CreateFixtures()
+    public (int fixtureId, List<List<MatchDTO>> fixtures) CreateFixtures(string fixtureName)
     {
-
         var fixtures = new List<List<MatchDTO>>();
 
         ResetAllTeamLevels();
 
-        // loop through each round
         for (int i = 1; i <= _roundCount; i++)
         {
-            // copy the round matches
             var roundMatches = CopyRoundToMainFixtures(i);
-
             fixtures.Add(roundMatches);
 
-            // rotate teams for next round
             RotateTeams();
         }
 
-        //home away system
         var reverseFixtures = GenerateReverseFixtures(fixtures);
         fixtures.AddRange(reverseFixtures);
 
-        int fixtureId = SaveFixtureToDB(fixtures);
+        //! isFinished will change
+        var fixtureEntity = new Fixture
+        {
+            Name = fixtureName,
+            CreatedAt = DateTime.Now,
+            IsFinished = false
+        };
+
+        _context.Fixtures.Add(fixtureEntity);
+        _context.SaveChanges();
+
+        int fixtureId = fixtureEntity.Id;
+
+
+        SaveFixtureToDB(fixtures, fixtureId);
 
         return (fixtureId, fixtures);
     }
