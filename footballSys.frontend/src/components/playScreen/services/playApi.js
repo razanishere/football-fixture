@@ -56,3 +56,9 @@ export const finishFixtureApi = async (fixtureId) => {
 
   return await response.text();
 };
+
+
+export const fetchFixtureByIdApi = async (fixtureId) => {
+  const res = await fetch(`${BASE_URL}/fixtures/${fixtureId}`);
+  return await res.json();
+};

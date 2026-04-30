@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { getFixtures } from "./services/fixtureInfoApi";
 import { useNavigate } from "react-router-dom";
 
-
-
-
 const ContinueGamePage = () => {
-
   const navigate = useNavigate();
   const [fixtures, setFixtures] = useState([]);
+
+  const goToMainMenu = () => {
+    navigate("/");
+  };
 
   useEffect(() => {
     fetchFixtures();
@@ -26,6 +26,8 @@ const ContinueGamePage = () => {
   return (
     <div>
       <h2>Continue Game</h2>
+
+      <button onClick={goToMainMenu}>Return to Main Menu</button>
 
       <div className="fixture-grid">
         {fixtures.map((fixture) => (

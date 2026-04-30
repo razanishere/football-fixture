@@ -81,6 +81,63 @@ namespace footballSys.api.Controllers
         }
 
 
+        //* send fixture using fixtureID
+        [HttpGet("{fixtureId}")]
+        public IActionResult GetFixtureById(int fixtureId)
+        {
+            var fixtureExists = _context.Fixtures.Any(f => f.Id == fixtureId);
+
+            if (!fixtureExists)
+            {
+                return NotFound("Fixture not found!");
+            }
+
+            var matches = _context.Matches
+                .Where(m => m.fixtureId == fixtureId)
+                .ToList();
+
+            if (!matches.Any())
+            {
+                return NotFound("No matches found for this fixture!");
+            }
+
+            var teamIds = matches
+                .Select(m => m.HomeTeamId)
+                .Union(matches.Select(m => m.AwayTeamId))
+                .Distinct();
+
+            var teams = _context.Teams
+                .Where(t => teamIds.Contains(t.Id))
+                .Select(t => new
+                {
+                    t.Id,
+                    t.teamName,
+                    t.level
+                })
+                .ToList();
+
+            var fixtures = matches
+                .GroupBy(m => m.Week)
+                .OrderBy(g => g.Key)
+                .Select(g => g.Select(m => new
+                {
+                    m.Id,
+                    m.HomeTeamId,
+                    m.AwayTeamId,
+                    HomeTeamName = _context.Teams.First(t => t.Id == m.HomeTeamId).teamName,
+                    AwayTeamName = _context.Teams.First(t => t.Id == m.AwayTeamId).teamName,
+                    m.Week
+                }).ToList())
+                .ToList();
+
+            return Ok(new
+            {
+                FixtureId = fixtureId,
+                Fixtures = fixtures,
+                Teams = teams
+            });
+        }
+
         // BELOW: MATCH RESULTS ENDPOINTS
 
         //* show all matches with results

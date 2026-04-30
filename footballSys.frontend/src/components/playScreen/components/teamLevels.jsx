@@ -1,10 +1,13 @@
 const TeamLevels = ({ teamLevels }) => {
+  const sortedTeams = [...teamLevels].sort((a, b) => b.level - a.level);
+
   return (
     <div style={{ marginTop: "20px" }}>
       <h3>Team Levels</h3>
-      {teamLevels.map((team) => (
+
+      {sortedTeams.map((team, index) => (
         <div key={team.id}>
-          {team.teamName} Level: {team.level}
+          {index + 1}. {team.teamName} - Level: {team.level}
         </div>
       ))}
     </div>

@@ -9,7 +9,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<MainMenu />} />
-      <Route path="/play" element={<PlayPage />} />
+      <Route path="/play/:fixtureId" element={<PlayPage />} />
       <Route path="/continue-game" element={<ContinueGamePage />} />
     </Routes>
   );

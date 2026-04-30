@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MatchSchedule from "./components/MatchSchedule";
 import MatchResults from "./components/MatchResults";
@@ -10,12 +10,14 @@ import {
   playWeekApi,
   playAllApi,
   fetchLeagueTableApi,
-  finishFixtureApi
+  finishFixtureApi,
+  fetchFixtureByIdApi,
 } from "./services/playApi";
 
 const PlayPage = () => {
-  const location = useLocation();
+  ////const location = useLocation();
   const navigate = useNavigate();
+  const { fixtureId } = useParams();
 
   const [currentWeek, setCurrentWeek] = useState(0);
   const [resultsByWeek, setResultsByWeek] = useState({});
@@ -26,20 +28,12 @@ const PlayPage = () => {
   const [leagueTable, setLeagueTable] = useState([]);
   const [tableUnlocked, setTableUnlocked] = useState(false);
 
-  // this is where fixtures will come from
-  const fixtureData = location.state?.fixtures;
-  const fixtures = fixtureData?.fixtures;
-  const fixtureId = fixtureData?.fixtureId;
+  const [fixtures, setFixtures] = useState([]);
+
 
   // next previous button boundries
   const isFirstWeek = currentWeek === 0;
   const isLastWeek = currentWeek === fixtures.length - 1;
-
-  if (!fixtures) {
-    return <div>No fixtures found</div>;
-  }
-
- 
 
 
   const goToMainMenu = () => {
@@ -71,7 +65,21 @@ const PlayPage = () => {
     }
   };
 
-  
+  useEffect(() => {
+    const loadFixture = async () => {
+      try {
+        const data = await fetchFixtureByIdApi(fixtureId);
+        setFixtures(data.fixtures);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (fixtureId) {
+      loadFixture();
+    }
+  }, [fixtureId]);
+
 
   const playWeek = async () => {
     try {
@@ -152,6 +160,10 @@ const PlayPage = () => {
     (m) => m.isPlayed === 1,
   );
 
+  if (!fixtures || fixtures.length === 0) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <h1>Play Screen</h1>
@@ -181,7 +193,6 @@ const PlayPage = () => {
         <button
           onClick={async () => {
             await fetchLeagueTable();
-            
             setShowTableModal(true);
           }}
         >
