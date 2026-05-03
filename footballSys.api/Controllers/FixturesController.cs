@@ -101,20 +101,18 @@ namespace footballSys.api.Controllers
                 return NotFound("No matches found for this fixture!");
             }
 
-            var teamIds = matches
-                .Select(m => m.HomeTeamId)
-                .Union(matches.Select(m => m.AwayTeamId))
-                .Distinct();
-
-            var teams = _context.Teams
-                .Where(t => teamIds.Contains(t.Id))
-                .Select(t => new
-                {
-                    t.Id,
-                    t.teamName,
-                    t.level
-                })
-                .ToList();
+            
+            var teams = (
+            from ftl in _context.TeamLevels
+            join t in _context.Teams on ftl.TeamId equals t.Id
+            where ftl.FixtureId == fixtureId
+            select new
+            {
+                Id = t.Id,
+                teamName = t.teamName,
+                level = ftl.Level
+            }
+            ).ToList();
 
             var fixtures = matches
                 .GroupBy(m => m.Week)

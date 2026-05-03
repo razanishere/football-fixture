@@ -78,10 +78,13 @@ public class GoalSystem
         _context = context;
     }
 
-
+    private TeamLevels GetTeamLevel(int fixtureId, int teamId)
+    {
+        return _context.TeamLevels
+            .First(x => x.FixtureId == fixtureId && x.TeamId == teamId);
+    }
 
     //* method to generate attempts 
-
     private int GenerateAttempts(int level, Random rnd)
     {
         int minRange = StrengthRule.getMinAttempts(level);
@@ -109,53 +112,53 @@ public class GoalSystem
 
     }
 
-    private void UpdateLevel(int homeGoals, int awayGoals, Teams home, Teams away)
-{
-    int diff = Math.Abs(homeGoals - awayGoals);
-
-    
-    if (diff > 1)
+    private void UpdateLevel(int homeGoals, int awayGoals, TeamLevels home, TeamLevels away)
     {
-        if (homeGoals > awayGoals)
+        int diff = Math.Abs(homeGoals - awayGoals);
+
+        if (diff > 1)
         {
-            home.level++;
-            away.level--;
+            if (homeGoals > awayGoals)
+            {
+                home.Level++;
+                away.Level--;
+            }
+            else
+            {
+                away.Level++;
+                home.Level--;
+            }
         }
-        else
-        {
-            away.level++;
-            home.level--;
-        }
+
+        home.Level = Math.Clamp(home.Level, 1, 9);
+        away.Level = Math.Clamp(away.Level, 1, 9);
     }
 
-    home.level = Math.Clamp(home.level, 1, 9);
-    away.level = Math.Clamp(away.level, 1, 9);
-}
 
-    
+
 
     // we dont save to database here because this method gets used continuesly and the data keeps getting updated
     // we save the scores to the database in the ScoreGenerator method
     //* the match 
     public void SimulateMatch(Match match, Random rnd)
     {
-        var homeTeam = _context.Teams.First(t => t.Id == match.HomeTeamId);
-        var awayTeam = _context.Teams.First(t => t.Id == match.AwayTeamId);
+        var homeLevel = GetTeamLevel(match.fixtureId, match.HomeTeamId);
+        var awayLevel = GetTeamLevel(match.fixtureId, match.AwayTeamId);
 
-        int homeAttempts = GenerateAttempts(homeTeam.level, rnd);
-        double homeProbability = StrengthRule.getGoalProbability(homeTeam.level);
+        int homeAttempts = GenerateAttempts(homeLevel.Level, rnd);
+        double homeProbability = StrengthRule.getGoalProbability(homeLevel.Level);
         int homeGoals = GenerateGoals(homeAttempts, homeProbability, rnd);
 
-        int awayAttempts = GenerateAttempts(awayTeam.level, rnd);
-        double awayProbability = StrengthRule.getGoalProbability(awayTeam.level);
+        int awayAttempts = GenerateAttempts(awayLevel.Level, rnd);
+        double awayProbability = StrengthRule.getGoalProbability(awayLevel.Level);
         int awayGoals = GenerateGoals(awayAttempts, awayProbability, rnd);
 
         match.homeScore = homeGoals;
         match.awayScore = awayGoals;
 
 
-       UpdateLevel(homeGoals, awayGoals, homeTeam, awayTeam);
-        
+        UpdateLevel(homeGoals, awayGoals, homeLevel, awayLevel);
+
 
 
     }

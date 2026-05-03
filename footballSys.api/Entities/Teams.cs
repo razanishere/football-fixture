@@ -23,6 +23,7 @@ public class Teams
     [Column(Order = 5)]
     public required string teamColor2 {get; set;}
 
+    //TODO: DELETE
     public int level {get; set;} = 5;
 
 

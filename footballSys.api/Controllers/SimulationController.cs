@@ -41,28 +41,22 @@ namespace footballSys.api.Controllers
                 return NotFound("NOT FOUND!");
             }
 
-            // show teams score
-            var teamIdsInFixture = _context.Matches
-                .Where(m => m.fixtureId == fixtureId)
-                .Select(m => m.HomeTeamId)
-                .Union(
-                    _context.Matches
-                        .Where(m => m.fixtureId == fixtureId)
-                        .Select(m => m.AwayTeamId)
-                )
-                .Distinct();
+            _scoreGenerator.GenerateScore(fixtureId);
 
-            var teamLevels = _context.Teams
-                .Where(t => teamIdsInFixture.Contains(t.Id))
-                .Select(t => new
+            var teamLevels = _context.TeamLevels
+                .Where(ftl => ftl.FixtureId == fixtureId)
+                .Select(ftl => new
                 {
-                    t.Id,
-                    t.teamName,
-                    t.level
+                    Id = ftl.TeamId,
+                    teamName = _context.Teams
+                        .Where(t => t.Id == ftl.TeamId)
+                        .Select(t => t.teamName)
+                        .FirstOrDefault(),
+                    level = ftl.Level
                 })
                 .ToList();
 
-            _scoreGenerator.GenerateScore(fixtureId);
+
 
             var matches = _context.Matches
             .Where(m => m.fixtureId == fixtureId)
@@ -111,29 +105,23 @@ namespace footballSys.api.Controllers
                 return NotFound("Week not found!");
             }
 
-            //show team scores
-
-            var teamIdsInFixture = _context.Matches
-                .Where(m => m.fixtureId == fixtureId)
-                .Select(m => m.HomeTeamId)
-                .Union(
-                    _context.Matches
-                        .Where(m => m.fixtureId == fixtureId)
-                        .Select(m => m.AwayTeamId)
-                )
-                .Distinct();
-
-            var teamLevels = _context.Teams
-                .Where(t => teamIdsInFixture.Contains(t.Id))
-                .Select(t => new
-                {
-                    t.Id,
-                    t.teamName,
-                    t.level
-                })
-                .ToList();
 
             _scoreGenerator.GenerateScoreForWeek(fixtureId, week);
+
+            var teamLevels = (
+            from ftl in _context.TeamLevels
+            join t in _context.Teams on ftl.TeamId equals t.Id
+            where ftl.FixtureId == fixtureId
+            select new
+            {
+                Id = t.Id,
+                teamName = t.teamName,
+                level = ftl.Level
+            }
+        ).ToList();
+
+
+            
 
             var matches = _context.Matches
             .Where(m => m.fixtureId == fixtureId && m.Week == week)
@@ -200,7 +188,7 @@ namespace footballSys.api.Controllers
             return Ok("Fixture marked as finished.");
         }
 
-         //* to fetch fixture infos from Fixture table
+        //* to fetch fixture infos from Fixture table
         [HttpGet("get-fixtures")]
         public async Task<ActionResult<IEnumerable<Fixture>>> GetFixtures()
         {

@@ -16,6 +16,10 @@ public class teamsContext(DbContextOptions<teamsContext> options) : DbContext(op
     public DbSet<Match> Matches => Set<Match>();
 
     public DbSet<Fixture> Fixtures => Set<Fixture>();
+    
+    public DbSet<TeamLevels> TeamLevels => Set<TeamLevels>();
+
+
 
 
 

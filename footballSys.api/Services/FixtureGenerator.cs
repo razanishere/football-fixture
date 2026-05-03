@@ -56,6 +56,28 @@ public class FixtureGenerator
         _teamSet = true;
     }
 
+    
+    private void InitializeFixtureTeamLevels(int fixtureId)
+{
+    var teamIds = _teams.Where(t => t != DUMMY_TEAM).ToList();
+
+    foreach (var teamId in teamIds)
+    {
+        var levelEntry = new TeamLevels
+        {
+            FixtureId = fixtureId,
+            TeamId = teamId,
+            Level = 5
+        };
+
+        _context.TeamLevels.Add(levelEntry);
+    }
+
+    _context.SaveChanges();
+}
+    
+    
+    
     //? look at this 
     private List<MatchDTO> CopyRoundToMainFixtures(int roundNumber)
     {
@@ -131,20 +153,6 @@ public class FixtureGenerator
     }
 
 
-    //* resets ALL teams to 5
-    //? do i reset only the teams used 
-    private void ResetAllTeamLevels()
-    {
-        var teams = _context.Teams.ToList();
-
-        foreach (var team in teams)
-        {
-            team.level = 5;
-        }
-
-        _context.SaveChanges();
-    }
-
     //method to save fixture result to the database
     private int SaveFixtureToDB(List<List<MatchDTO>> fixtures, int fixtureId)
     {
@@ -177,8 +185,6 @@ public class FixtureGenerator
     {
         var fixtures = new List<List<MatchDTO>>();
 
-        ResetAllTeamLevels();
-
         for (int i = 1; i <= _roundCount; i++)
         {
             var roundMatches = CopyRoundToMainFixtures(i);
@@ -203,6 +209,8 @@ public class FixtureGenerator
 
         int fixtureId = fixtureEntity.Id;
 
+
+        InitializeFixtureTeamLevels(fixtureId);
 
         SaveFixtureToDB(fixtures, fixtureId);
 
