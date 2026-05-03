@@ -5,8 +5,10 @@ const FixtureTeamSelectionModal = ({ onClose, onGenerate }) => {
   const [teams, setTeams] = useState([]);
   const [selectedTeamIds, setSelectedTeamIds] = useState([]);
 
-  
   const [fixtureNameInput, setFixtureNameInput] = useState("");
+
+  //special mode
+  const [isSpecialMode, setIsSpecialMode] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5201/intro")
@@ -45,6 +47,7 @@ const FixtureTeamSelectionModal = ({ onClose, onGenerate }) => {
       body: JSON.stringify({
         teamIds: [...selectedTeamIds].map(Number),
         fixtureName: fixtureNameInput ?? "",
+        isSpecialMode: isSpecialMode, 
       }),
     })
       .then(async (res) => {
@@ -69,7 +72,6 @@ const FixtureTeamSelectionModal = ({ onClose, onGenerate }) => {
       <div className="modal">
         <h2>Select Teams</h2>
 
-        
         <input
           type="text"
           placeholder="Enter fixture name"
@@ -91,6 +93,14 @@ const FixtureTeamSelectionModal = ({ onClose, onGenerate }) => {
         </div>
 
         <div className="modal-buttons">
+          <label>
+            <input
+              type="checkbox"
+              checked={isSpecialMode}
+              onChange={() => setIsSpecialMode(!isSpecialMode)}
+            />
+            Special Mode
+          </label>
           <button onClick={onClose}>Cancel</button>
           <button onClick={handleGenerateFixture}>Generate Fixture</button>
         </div>

@@ -33,15 +33,30 @@ namespace footballSys.api.Controllers
                 .Where(t => request.TeamIds.Contains(t.Id))
                 .ToList();
 
+            
+            if (request.IsSpecialMode)
+            {
+                var fenerbahce = _context.Teams.FirstOrDefault(t => t.Id == 5);
+
+                if (fenerbahce != null && !selectedTeams.Any(t => t.Id == fenerbahce.Id))
+                {
+                    selectedTeams.Add(fenerbahce);
+                }
+            }
+
             var teamIdList = selectedTeams
                 .Select(t => t.Id)
                 .ToList();
 
-
+            
             _fixtureGenerator.InitializeFixtureSettings(teamIdList);
 
+            
+            var result = _fixtureGenerator.CreateFixtures(
+                request.FixtureName,
+                request.IsSpecialMode
+            );
 
-            var result = _fixtureGenerator.CreateFixtures(request.FixtureName);
             var fixtures = result.fixtures;
             var fixtureId = result.fixtureId;
 
@@ -49,7 +64,6 @@ namespace footballSys.api.Controllers
 
             var fixturesWithNames = new List<List<MatchWithNamesDTO>>();
 
-            //* mapping the dictionary of names with the ids from the algorithm
             for (int weekIndex = 0; weekIndex < fixtures.Count; weekIndex++)
             {
                 var weekMatches = fixtures[weekIndex];
@@ -64,8 +78,8 @@ namespace footballSys.api.Controllers
                         HomeTeamName = teamDictionary[match.HomeTeamId],
                         AwayTeamName = teamDictionary[match.AwayTeamId],
                         week = weekIndex + 1
-
                     };
+
                     dtoWeek.Add(dto);
                 }
 
@@ -75,9 +89,9 @@ namespace footballSys.api.Controllers
             return Ok(new
             {
                 FixtureId = fixtureId,
-                Fixtures = fixturesWithNames
+                Fixtures = fixturesWithNames,
+                IsSpecialMode = request.IsSpecialMode
             });
-
         }
 
 
@@ -101,7 +115,7 @@ namespace footballSys.api.Controllers
                 return NotFound("No matches found for this fixture!");
             }
 
-            
+
             var teams = (
             from ftl in _context.TeamLevels
             join t in _context.Teams on ftl.TeamId equals t.Id

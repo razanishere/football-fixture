@@ -56,28 +56,32 @@ public class FixtureGenerator
         _teamSet = true;
     }
 
-    
-    private void InitializeFixtureTeamLevels(int fixtureId)
-{
-    var teamIds = _teams.Where(t => t != DUMMY_TEAM).ToList();
 
-    foreach (var teamId in teamIds)
+
+    private void InitializeFixtureTeamLevels(int fixtureId, bool isSpecialMode)
     {
-        var levelEntry = new TeamLevels
-        {
-            FixtureId = fixtureId,
-            TeamId = teamId,
-            Level = 5
-        };
+        var teamIds = _teams.Where(t => t != DUMMY_TEAM).ToList();
 
-        _context.TeamLevels.Add(levelEntry);
+        foreach (var teamId in teamIds)
+        {
+            var team = _context.Teams.First(t => t.Id == teamId);
+
+            var levelEntry = new TeamLevels
+            {
+                FixtureId = fixtureId,
+                TeamId = teamId,
+                Level = isSpecialMode
+                    ? (team.Id == 5 ? 9 : 1)
+                    : 5
+            };
+
+            _context.TeamLevels.Add(levelEntry);
+        }
+
+        _context.SaveChanges();
     }
 
-    _context.SaveChanges();
-}
-    
-    
-    
+
     //? look at this 
     private List<MatchDTO> CopyRoundToMainFixtures(int roundNumber)
     {
@@ -181,7 +185,7 @@ public class FixtureGenerator
     }
 
 
-    public (int fixtureId, List<List<MatchDTO>> fixtures) CreateFixtures(string fixtureName)
+    public (int fixtureId, List<List<MatchDTO>> fixtures) CreateFixtures(string fixtureName, bool isSpecialMode)
     {
         var fixtures = new List<List<MatchDTO>>();
 
@@ -210,7 +214,7 @@ public class FixtureGenerator
         int fixtureId = fixtureEntity.Id;
 
 
-        InitializeFixtureTeamLevels(fixtureId);
+        InitializeFixtureTeamLevels(fixtureId, isSpecialMode);
 
         SaveFixtureToDB(fixtures, fixtureId);
 
